@@ -1,0 +1,304 @@
+<html>
+<head>
+  <style type="text/css">
+  @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+  
+  body {
+    background: url(background-2.jpg) no-repeat center center / cover;
+    font: 16px "Roboto", sans-serif;
+  }
+  .wrapper{
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  div#card-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .logo-wrapper {
+    display: block;
+    text-align: center;
+  }
+  .logo-wrapper img {
+    margin: 40px auto;
+    display: inline-block;
+  }
+  .pokemon {
+    padding:  15px;
+    display:  inline-block;
+    margin:  10px;
+    border-radius: 20px;
+    text-align: center;
+    width: 20%;
+    box-sizing: border-box;
+    
+  }
+  .pokemon h1 {
+    text-transform: capitalize;
+    font-size: 20px;
+    color: #fff;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  .pokemon img {
+    width: 150px;
+  }
+
+  .pokemon.grass {
+    background: #a2cd88;
+  }
+  .pokemon.normal{
+    background: #A8A77A
+  }
+  .pokemon.fire { 
+    background: #efaa76
+  }
+  .pokemon.water {
+    background: #89aaf2;
+  }
+  .pokemon.electric {
+    background: #F7D02C
+  }
+
+  .pokemon.ice {
+    background: #96D9D6;
+  }
+  .pokemon.fighting {
+    background: #C22E28;
+  }
+  .pokemon.poison {
+    background: #b768b6;
+  }
+  .pokemon.ground {
+    background: #E2BF65;
+  }
+  .pokemon.flying {
+    background: #A98FF3;
+  }
+  .pokemon.psychic {
+    background: #F95587;
+  }
+  .pokemon.bug {
+    background: #c3d34b;
+  }
+  .pokemon.rock {
+    background: #B6A136;
+  }
+  .pokemon.ghost {
+    background: #735797;
+  }
+  .pokemon.dragon {
+    background: #6F35FC;
+  }
+  .pokemon.dark {
+    background: #705746;
+  }
+  .pokemon.steel {
+    background: #B7B7CE;
+  }
+  .pokemon.fairy {
+    background: #D685AD;
+  }
+
+  .buttonWrapper {
+    margin: 30px auto;
+    text-align: center;
+    display: flex;
+    width: 400px;
+    align-items: center;
+    justify-content: space-evenly;
+  }
+
+  .buttonWrapper button {
+    padding: 12px 30px;
+    background: #3D7DCA;
+    color: #fff;
+    box-shadow: none;
+    border: none;
+    border-radius: 5px;
+    font-size: 18px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .buttonWrapper button:hover {
+    background: #2963a8;
+  }
+
+  #modalWrapper {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background: #0009;
+    text-align: center;
+    display: none;
+    align-items: center;
+  }
+
+  #popup {
+    width: 500px;
+    height: 500px;
+    background: #fff;
+    margin: 40px auto;
+    border-radius: 30px;
+    color: #000;
+    padding: 20px;
+  }
+
+</style>
+
+
+</head>
+<body>
+  <div class="wrapper">
+    <div class="logo-wrapper">
+    <img src="pokemon_logo.svg"/>
+  </div>
+  <div id="card-wrapper"></div>
+  <div class="buttonWrapper">
+    <button onclick="prevPokemonList()" id="prevbtn">Previous</button>
+    <button onclick="nextPokemonList()" id="nextbtn">Next</button>
+  </div> 
+  <div id="modalWrapper"></div>
+  </div>
+  
+
+  <script type="text/javascript">
+
+    // Base URL of PokeAPI
+    const POKE_API_URL = "https://pokeapi.co/api/v2";
+    
+    //Request offset
+    let requestOffset = 0;
+    
+    //HTML Card Wrapper
+    let wrapper = document.getElementById("card-wrapper");
+    let modal = document.getElementById("modalWrapper");
+    let isModalOpen = false;
+
+    //HTML Pokemon Card
+    let pokemonCard = document.getElementsByClassName('pokemon')
+    
+    const PokeAPI = {
+      getPokemonList: async function(limit=10, offset=0) {
+        let response = await fetch(POKE_API_URL + `/pokemon?limit=${limit}&offset=${offset}`);
+        return await response.json();
+      },
+
+      getSpecies: async function(id){
+        let response = await fetch(POKE_API_URL + `/pokemon-species/` + id);
+        return await response.json();
+      },
+
+      getPokemonDetails: async function(names) {
+        let result = [];
+    
+        for (i = 0; i < names.length; i++) {
+          let pokemon = await fetch(POKE_API_URL + "/pokemon/" + names[i]).then(
+            function (response) {
+              return response.json();
+            }
+          );
+      
+          result.push(pokemon);
+        }
+
+      
+        return result;
+      }
+    };
+  
+    
+    function nextPokemonList(){
+      requestOffset += 8;
+      drawPokemonList(requestOffset);
+
+      console.log(requestOffset)
+    }
+    
+    
+    function prevPokemonList(){
+      requestOffset -= 8;
+      drawPokemonList(requestOffset);
+
+      console.log(requestOffset)
+    }
+    
+    
+    //Get a list of pokemons
+    async function drawPokemonList(offset) {
+      let response = await PokeAPI.getPokemonList(8, requestOffset);
+    
+      let pokemonNames = [];
+      response.results.forEach(function (item, index) {
+        pokemonNames.push(item.name);
+      });
+      
+    
+      let pokemons = await PokeAPI.getPokemonDetails(pokemonNames);
+
+      wrapper.innerHTML = '';
+
+      for( let i  = 0; i < pokemons.length; i++) {
+        let species = await PokeAPI.getSpecies(pokemons[i].id);
+        pokemons[i].speciesDetails = species;
+
+        let pokeDiv = `<div class="pokemon ${pokemons[i].types[0].type.name}" data-name="${pokemons[i].name}">`;
+        pokeDiv += `<img src="${pokemons[i].sprites.front_default}">`;
+        pokeDiv += `<h1>${pokemons[i].name}</h1>`;
+        pokeDiv += '</div>';
+        
+        wrapper.innerHTML += pokeDiv;
+      }
+
+      let pokemonDiv = Array.from(document.getElementsByClassName('pokemon'));
+      pokemonDiv.forEach(function(poke){
+        poke.addEventListener('click', function (event) {
+          modalWrapper.style.display = 'flex';
+            let pokemonName = event.currentTarget.dataset.name;
+            pokemons.forEach(function(pokemon){
+              if(pokemon.name == pokemonName){
+                console.log(pokemon)
+                let modal = `<div id="popup">`;
+                modal+=`<img src="${pokemon.sprites.front_default}"/>`;
+                modal+=`<h2>name: ${pokemon.name}</h2>`;
+                modal+=`<p> ${pokemon.speciesDetails.flavor_text_entries[0].flavor_text}</p>`;
+                modal+=`<h2>weight: ${pokemon.weight}</h2>`;
+                modal+=`<h2>height: ${pokemon.height}</h2>`;
+                pokemon.stats.forEach(function(item){
+                  modal+=`<h2>${item.stat.name}: ${item.base_stat}</h2>`;
+                })
+                pokemon.types.forEach(function(item){
+                  modal+=`<h2>${item.type.name}</h2>`;
+                })
+                modal += `</div>`;
+                modalWrapper.innerHTML = modal;
+                isModalOpen = !isModalOpen;
+              }
+
+            });
+        });
+      })
+    }
+
+    window.onclick = function(event) {
+       if (event.target.id == "modalWrapper" && isModalOpen){
+        console.log('close the modal', isModalOpen)
+        document.getElementById("modalWrapper").style.display = 'none';
+        isModalOpen = !isModalOpen;
+           
+       } else {
+          console.log('not gonna close the modal', event.target.id, isModalOpen)
+       }
+    }
+    drawPokemonList(requestOffset);
+  </script>
+</body>
+</html>
