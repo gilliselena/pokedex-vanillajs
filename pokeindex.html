@@ -186,6 +186,7 @@
     //HTML Pokemon Card
     let pokemonCard = document.getElementsByClassName('pokemon')
     
+    //Pokemon API Wrapper
     const PokeAPI = {
       getPokemonList: async function(limit=10, offset=0) {
         let response = await fetch(POKE_API_URL + `/pokemon?limit=${limit}&offset=${offset}`);
